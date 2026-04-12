@@ -1,0 +1,43 @@
+name: Monthly Excel Export
+
+on:
+  schedule:
+    - cron: '0 0 1 * *' # Run at 00:00 on day-of-month 1
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  export-and-email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Excel Export
+        run: node scripts/exportData.js
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          # SMTP configuration needs to be set as repository secrets
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Monthly Mortgage Tracking Data"
+          to: danvinersar98@gmail.com
+          from: GitHub Actions <no-reply@github.com>
+          body: "Hello, please find your monthly mortgage tracking data attached."
+          attachments: Mortgage_Payments_History.xlsx
