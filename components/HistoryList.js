@@ -68,7 +68,6 @@ export default function HistoryList({ schedule, onDelete, onUpdate }) {
                         <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>Type</th>
                                 <th>Principal</th>
                                 <th>Interest</th>
                                 <th>Fees</th>
@@ -81,19 +80,17 @@ export default function HistoryList({ schedule, onDelete, onUpdate }) {
                             {schedule.map(item => (
                                 <tr key={item.id}>
                                     <td>
-                                        <div className="table-cell-display" data-label="Date">
-                                            {new Date(item.date).toLocaleDateString('ro-RO')}
+                                        <div className="table-cell-display" data-label="Date" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            {(() => {
+                                                const isMonthly = item.date && parseInt(item.date.split("-")[2], 10) === 10;
+                                                return isMonthly ? (
+                                                    <span className="payment-indicator monthly" title="Monthly Payment"></span>
+                                                ) : (
+                                                    <span className="payment-indicator additional" title="Additional Payment"></span>
+                                                );
+                                            })()}
+                                            <span>{new Date(item.date).toLocaleDateString('ro-RO')}</span>
                                         </div>
-                                    </td>
-                                    <td data-label="Type">
-                                        {(() => {
-                                            const isMonthly = item.date && parseInt(item.date.split("-")[2], 10) === 10;
-                                            return isMonthly ? (
-                                                <span className="payment-badge monthly">Monthly</span>
-                                            ) : (
-                                                <span className="payment-badge additional">Additional</span>
-                                            );
-                                        })()}
                                     </td>
                                     <td data-label="Principal">
                                         <EditableCell
