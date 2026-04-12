@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 import { formatCurrency } from "@/utils/format";
 
 // Cell Component for Click-to-Edit
@@ -57,9 +58,32 @@ const EditableCell = ({ value, type = "text", onSave }) => {
 };
 
 export default function HistoryList({ schedule, onDelete, onUpdate }) {
+
+    const exportToExcel = () => {
+        if (!schedule || schedule.length === 0) {
+            alert("No data to export");
+            return;
+        }
+
+        const dataToExport = schedule.map(item => ({
+            Date: new Date(item.date).toLocaleDateString('ro-RO'),
+            Principal: item.principal,
+            Interest: item.interest,
+            Fees: item.fees,
+            Total: item.amount,
+            RemainingBalance: item.remainingBalance
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Payment History");
+        XLSX.writeFile(workbook, "Mortgage_Payments_History.xlsx");
+    };
+
     return (
         <section className="history-section">
             <h2>History</h2>
+            <button className="btn-primary" style={{ width: 'auto', padding: '8px 16px', marginBottom: '16px', fontSize: '12px' }} onClick={exportToExcel}>Export to Excel</button>
             <div className="table-container">
                 {schedule.length === 0 ? (
                     <div className="empty-state">No payments yet. Start tracking!</div>
