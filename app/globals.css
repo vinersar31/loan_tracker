@@ -608,3 +608,24 @@ input[readonly] {
   font-style: italic;
   background: rgba(0, 0, 0, 0.1);
 }
+.payment-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-badge.monthly {
+  background-color: rgba(108, 93, 211, 0.2);
+  color: var(--primary);
+  border: 1px solid rgba(108, 93, 211, 0.3);
+}
+
+.payment-badge.additional {
+  background-color: rgba(0, 224, 150, 0.2);
+  color: var(--success);
+  border: 1px solid rgba(0, 224, 150, 0.3);
+}
