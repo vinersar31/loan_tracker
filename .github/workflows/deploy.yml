@@ -44,6 +44,10 @@ jobs:
           path: ./out
 
   deploy:
+    # Only run deploy job for pushes to main branch, or manual dispatch.
+    # We still run the 'build' job for pull requests to verify compilation,
+    # but GitHub Pages environments block PR deployments by default.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
