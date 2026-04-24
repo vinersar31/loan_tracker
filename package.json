@@ -18,5 +18,10 @@
     "react-dom": "^19.0.0",
     "recharts": "^2.15.1",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^15.5.15"
   }
 }
