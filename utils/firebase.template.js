@@ -1,8 +1,9 @@
-# Firebase Configuration Template
-# Copy this file to utils / firebase.js and fill in your Firebase credentials
+// Firebase Configuration Template
+// Copy this file to utils/firebase.js and fill in your Firebase credentials
 
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
     apiKey: "YOUR_API_KEY_HERE",
@@ -15,3 +16,4 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const auth = getAuth(app);

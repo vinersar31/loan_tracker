@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 
 export default function PaymentForm({ onAdd }) {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -7,19 +7,13 @@ export default function PaymentForm({ onAdd }) {
     const [principal, setPrincipal] = useState('');
     const [interest, setInterest] = useState('');
     const [fees, setFees] = useState('');
-    const [total, setTotal] = useState('');
 
-    // Auto-calculate total when components change
-    useEffect(() => {
+    const total = useMemo(() => {
         const p = parseFloat(principal) || 0;
         const i = parseFloat(interest) || 0;
         const f = parseFloat(fees) || 0;
         const sum = p + i + f;
-        if (sum > 0) {
-            setTotal(sum.toFixed(2));
-        } else {
-            setTotal('');
-        }
+        return sum > 0 ? sum.toFixed(2) : '';
     }, [principal, interest, fees]);
 
     const handleSubmit = (e) => {
@@ -37,7 +31,6 @@ export default function PaymentForm({ onAdd }) {
             setPrincipal('');
             setInterest('');
             setFees('');
-            setTotal('');
             setDate(new Date().toISOString().split('T')[0]);
         }
     };

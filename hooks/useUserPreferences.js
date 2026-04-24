@@ -1,61 +1,103 @@
-"use client";
-import { createContext, useContext, useState, useEffect } from 'react';
-import { getPreferences, savePreferences } from '@/utils/userPreferences';
+import { useState, useEffect, createContext, useContext } from 'react';
+
+const PREFS_KEY = 'mortgage_tracker_prefs';
+
+const defaultPreferences = {
+    theme: 'dark', // 'dark' | 'light'
+    hiddenIndicators: [],
+    hiddenStatCards: [],
+    statCardOrder: null, // null means use default order
+    indicatorOrder: null // null means use default order
+};
 
 const UserPreferencesContext = createContext();
 
 export function UserPreferencesProvider({ children }) {
-    const [prefs, setPrefs] = useState(() => ({
-        theme: 'dark',
-        hiddenStats: [],
-        hiddenIndicators: [],
-        statCardOrder: ['remaining', 'totalPrincipal', 'totalInterest', 'totalFees', 'totalPaid'],
-    }));
+    const [prefs, setPrefs] = useState(() => {
+        if (typeof window === 'undefined') return defaultPreferences;
+        try {
+            const stored = localStorage.getItem(PREFS_KEY);
+            return stored ? JSON.parse(stored) : defaultPreferences;
+        } catch (e) {
+            console.error("Failed to load preferences", e);
+            return defaultPreferences;
+        }
+    });
     const [mounted, setMounted] = useState(false);
-    const [version, setVersion] = useState(0);
 
     useEffect(() => {
-        // Load preferences only on client
-        const loadedPrefs = getPreferences();
-        console.log('UserPreferencesProvider: Loaded prefs from localStorage:', loadedPrefs);
-        setPrefs(loadedPrefs);
-        setMounted(true);
+        const timer = setTimeout(() => {
+            setMounted(true);
+        }, 0);
+        if (prefs.theme) {
+            document.documentElement.setAttribute('data-theme', prefs.theme);
+        }
+        return () => clearTimeout(timer);
+    }, [prefs.theme]);
 
-        // Apply theme
-        document.documentElement.setAttribute('data-theme', loadedPrefs.theme);
-    }, []);
-
-    const updatePrefs = (updates) => {
-        console.log('UserPreferencesProvider: updatePrefs called with:', updates);
-        setPrefs(current => {
-            const newPrefs = { ...current, ...updates };
-            console.log('UserPreferencesProvider: New prefs:', newPrefs);
-            savePreferences(newPrefs);
+    const updatePreference = (key, value) => {
+        setPrefs(prev => {
+            const newPrefs = { ...prev, [key]: value };
+            try {
+                localStorage.setItem(PREFS_KEY, JSON.stringify(newPrefs));
+                console.log(`Updated preference ${key} to`, value);
+            } catch (e) {
+                console.error("Failed to save preference", e);
+            }
             return newPrefs;
         });
-        setVersion(v => {
-            const newVersion = v + 1;
-            console.log('UserPreferencesProvider: Version incremented to:', newVersion);
-            return newVersion;
-        });
+    };
 
-        // Apply theme immediately
-        if (updates.theme) {
-            document.documentElement.setAttribute('data-theme', updates.theme);
+    // Derived helpers
+    const toggleTheme = () => {
+        const newTheme = prefs.theme === 'dark' ? 'light' : 'dark';
+        updatePreference('theme', newTheme);
+        document.documentElement.setAttribute('data-theme', newTheme);
+    };
+
+    const toggleIndicator = (id) => {
+        const hidden = [...(prefs.hiddenIndicators || [])];
+        if (hidden.includes(id)) {
+            updatePreference('hiddenIndicators', hidden.filter(i => i !== id));
+        } else {
+            updatePreference('hiddenIndicators', [...hidden, id]);
         }
     };
 
+    const toggleStatCard = (id) => {
+        const hidden = [...(prefs.hiddenStatCards || [])];
+        if (hidden.includes(id)) {
+            updatePreference('hiddenStatCards', hidden.filter(i => i !== id));
+        } else {
+            updatePreference('hiddenStatCards', [...hidden, id]);
+        }
+    };
+
+    const isHidden = (id, type) => {
+        if (type === 'indicator') {
+            return (prefs.hiddenIndicators || []).includes(id);
+        }
+        if (type === 'statCard') {
+            return (prefs.hiddenStatCards || []).includes(id);
+        }
+        return false;
+    };
+
     return (
-        <UserPreferencesContext.Provider value={{ prefs, updatePrefs, mounted, version }}>
+        <UserPreferencesContext.Provider value={{
+            prefs,
+            mounted,
+            updatePreference,
+            toggleTheme,
+            toggleIndicator,
+            toggleStatCard,
+            isHidden
+        }}>
             {children}
         </UserPreferencesContext.Provider>
     );
 }
 
 export function useUserPreferences() {
-    const context = useContext(UserPreferencesContext);
-    if (!context) {
-        throw new Error('useUserPreferences must be used within UserPreferencesProvider');
-    }
-    return context;
+    return useContext(UserPreferencesContext);
 }
