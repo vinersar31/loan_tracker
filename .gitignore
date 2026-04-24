@@ -41,7 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 # Firebase - DO NOT COMMIT THESE!
-utils/firebase.js
+# utils/firebase.js
 .firebaserc
 firebase.json
 firestore.rules
