@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('ro-RO', {
         style: 'currency',
-        currency: 'EUR',
+        currency: 'RON',
         minimumFractionDigits: 2
     }).format(value);
 }
