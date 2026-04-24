@@ -39,6 +39,8 @@ jobs:
       - name: Build with Next.js
         run: npm run build
       - name: Upload artifact
+        # Only upload artifact if it's not a pull request, since PRs can't deploy
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
@@ -47,7 +49,7 @@ jobs:
     # Only run deploy job for pushes to main branch, or manual dispatch.
     # We still run the 'build' job for pull requests to verify compilation,
     # but GitHub Pages environments block PR deployments by default.
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
