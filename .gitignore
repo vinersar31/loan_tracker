@@ -54,7 +54,4 @@ firestore.indexes.json
 # Antigravity artifacts (optional - comment out if you want to commit planning docs)
 .gemini/
 
-# npm
-package-lock.json
-package.json
 

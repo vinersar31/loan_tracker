@@ -1,3 +1,5 @@
+export const dynamic = "force-static";
+
 /**
  * Next.js API Route to fetch EUR/RON from BNR
  * Bypasses CORS by fetching server-side
@@ -5,7 +7,7 @@
 
 export async function GET() {
     try {
-        const response = await fetch('https://www.bnr.ro/nbrfxrates.xml');
+        const response = await fetch('https://www.bnr.ro/nbrfxrates.xml', { next: { revalidate: 3600 } });
 
         if (!response.ok) {
             throw new Error('Failed to fetch from BNR');
