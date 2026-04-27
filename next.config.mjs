@@ -4,9 +4,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   // The repository name for GitHub Pages path mapping
   basePath: '/loan_tracker',
   // Make sure asset prefixes also match the base path
