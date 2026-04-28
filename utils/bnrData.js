@@ -6,7 +6,9 @@
 // Fetch EUR/RON exchange rate via Next.js API route (bypasses CORS)
 export async function fetchEURRON() {
     try {
-        const response = await fetch('/api/bnr');
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/loan_tracker';
+        const url = typeof window !== 'undefined' ? `${window.location.origin}${basePath}/api/bnr` : `${basePath}/api/bnr`;
+        const response = await fetch(url);
         const data = await response.json();
 
         if (data.success) {
