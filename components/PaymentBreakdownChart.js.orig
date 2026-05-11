@@ -67,8 +67,8 @@ export default function PaymentBreakdownChart({ stats }) {
     return (
         <div className="chart-card">
             <h3>Payment Breakdown</h3>
-            <div style={{ width: '100%', height: '220px', minHeight: '220px' }}>
-                <ResponsiveContainer width="100%" height={220}>
+            <div style={{ width: '100%', height: '220px' }}>
+                <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
                             data={data}
