@@ -27,9 +27,11 @@ export function useLoanData() {
 
         const calculatedSchedule = sortedPayments.map(payment => {
             const principal = parseFloat(payment.principal || 0);
-            const interest = parseFloat(payment.interest || 0);
-            const fees = parseFloat(payment.fees || 0);
             const amount = parseFloat(payment.amount || 0);
+            const fees = parseFloat(payment.fees || 0);
+
+            const interest = amount - principal - fees;
+
 
             currentBalance -= principal;
             if (currentBalance < 0) currentBalance = 0;
