@@ -9,6 +9,13 @@ export async function fetchEURRON() {
     try {
         const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
         const response = await fetch(`${basePath}/api/bnr`);
+
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+            console.error('Expected JSON from /api/bnr but got:', contentType);
+            return null;
+        }
+
         const data = await response.json();
 
         if (data.success) {
