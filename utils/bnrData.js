@@ -7,7 +7,7 @@ import { db as firebaseDb } from './firebase';
 // Fetch EUR/RON exchange rate via Next.js API route (bypasses CORS)
 export async function fetchEURRON() {
     try {
-        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/loan_tracker';
         const response = await fetch(`${basePath}/api/bnr`);
         const data = await response.json();
 
