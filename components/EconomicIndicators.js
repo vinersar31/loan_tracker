@@ -69,7 +69,7 @@ export default function EconomicIndicators() {
                     setIndicators(querySnapshot.docs[0].data());
                 } else {
                     // Fallback to fetching directly if no cache in DB
-                    const data = await getAllIndicators();
+                    const data = await getAllIndicators(db);
                     setIndicators(data);
                 }
             } catch (err) {
