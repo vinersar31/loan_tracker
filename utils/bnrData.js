@@ -1,3 +1,4 @@
+import { db as firebaseDb } from './firebase';
 /**
  * BNR (Banca Națională a României) Data Utilities
  * Fetches economic indicators from BNR API and Firestore
@@ -6,9 +7,8 @@
 // Fetch EUR/RON exchange rate via Next.js API route (bypasses CORS)
 export async function fetchEURRON() {
     try {
-        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/loan_tracker';
-        const url = typeof window !== 'undefined' ? `${window.location.origin}${basePath}/api/bnr` : `${basePath}/api/bnr`;
-        const response = await fetch(url);
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const response = await fetch(`${basePath}/api/bnr`);
         const data = await response.json();
 
         if (data.success) {
@@ -24,10 +24,10 @@ export async function fetchEURRON() {
 }
 
 // Fetch other indicators from Firestore
-export async function getStoredIndicators(db) {
+export async function getStoredIndicators(db = firebaseDb) {
     try {
         const { doc, getDoc } = await import('firebase/firestore');
-        const docRef = doc(db, 'indicators', 'latest');
+        const docRef = doc(db || firebaseDb, 'indicators', 'latest');
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -50,10 +50,10 @@ export async function getStoredIndicators(db) {
 }
 
 // Combine all indicators
-export async function getAllIndicators(db) {
+export async function getAllIndicators(db = firebaseDb) {
     const [eurRon, stored] = await Promise.all([
         fetchEURRON(),
-        getStoredIndicators(db)
+        getStoredIndicators(db || firebaseDb)
     ]);
 
     return {
