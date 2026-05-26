@@ -50,10 +50,9 @@ jobs:
           path: ./out
 
   deploy:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     environment:
-      # Use dynamic environment name based on whether it's a PR or push
-      # PRs should deploy to a preview environment, not the main github-pages environment
-      name: ${{ github.event_name == 'pull_request' && format('pr-preview-{0}', github.event.number) || 'github-pages' }}
+      name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
