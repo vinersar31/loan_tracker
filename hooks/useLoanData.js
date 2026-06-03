@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { db, storage, auth } from '@/utils/firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
+import { db, auth } from '@/utils/firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 
 const DEFAULT_LOAN_AMOUNT = 412110.84; // User's specific amount
