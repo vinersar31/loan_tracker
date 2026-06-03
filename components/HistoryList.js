@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import * as XLSX from 'xlsx';
+import ManageDocumentsModal from './ManageDocumentsModal';
 import { formatCurrency } from "@/utils/format";
 
 // Cell Component for Click-to-Edit
@@ -57,7 +58,8 @@ const EditableCell = ({ value, type = "text", onSave }) => {
     );
 };
 
-export default function HistoryList({ schedule, onDelete, onUpdate }) {
+export default function HistoryList({ schedule, onDelete, onUpdate, onUploadDocuments, onDeleteDocument }) {
+    const [activePaymentForDocs, setActivePaymentForDocs] = useState(null);
 
     const exportToExcel = () => {
         if (!schedule || schedule.length === 0) {
@@ -97,6 +99,7 @@ export default function HistoryList({ schedule, onDelete, onUpdate }) {
                                 <th>Fees</th>
                                 <th>Total</th>
                                 <th>Rem.</th>
+                                <th>Docs</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -143,6 +146,18 @@ export default function HistoryList({ schedule, onDelete, onUpdate }) {
                                     <td className="text-dim" data-label="Remaining">
                                         {formatCurrency(item.remainingBalance)}
                                     </td>
+                                    <td data-label="Docs" style={{ textAlign: 'center' }}>
+                                        <button
+                                            onClick={() => setActivePaymentForDocs(item)}
+                                            style={{
+                                                background: 'none', border: 'none', cursor: 'pointer',
+                                                fontSize: '18px', filter: (!item.documents || item.documents.length === 0) ? 'grayscale(100%) opacity(0.3)' : 'none'
+                                            }}
+                                            title={item.documents && item.documents.length > 0 ? item.documents.map(d => d.name).join('\n') : 'No documents (Click to add)'}
+                                        >
+                                            {(!item.documents || item.documents.length === 0) ? '📄' : '📁'}
+                                        </button>
+                                    </td>
                                     <td>
                                         <button
                                             className="delete-btn"
@@ -158,6 +173,14 @@ export default function HistoryList({ schedule, onDelete, onUpdate }) {
                     </table>
                 )}
             </div>
+            {activePaymentForDocs && (
+                <ManageDocumentsModal
+                    payment={activePaymentForDocs}
+                    onClose={() => setActivePaymentForDocs(null)}
+                    onUpload={onUploadDocuments}
+                    onDeleteDocument={onDeleteDocument}
+                />
+            )}
         </section>
     );
 }

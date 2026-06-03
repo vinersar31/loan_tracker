@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import FileDropzone from './FileDropzone';
 
 export default function PaymentForm({ onAdd }) {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -7,6 +8,8 @@ export default function PaymentForm({ onAdd }) {
     const [principal, setPrincipal] = useState('');
     const [interest, setInterest] = useState('');
     const [fees, setFees] = useState('');
+    const [files, setFiles] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const total = useMemo(() => {
         const p = parseFloat(principal) || 0;
@@ -16,22 +19,25 @@ export default function PaymentForm({ onAdd }) {
         return sum > 0 ? sum.toFixed(2) : '';
     }, [principal, interest, fees]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (date && (principal || interest || fees)) {
-            onAdd({
+            setIsSubmitting(true);
+            await onAdd({
                 date,
                 amount: parseFloat(total) || 0,
                 principal: parseFloat(principal) || 0,
                 interest: parseFloat(interest) || 0,
                 fees: parseFloat(fees) || 0
-            });
+            }, files);
 
             // Reset
             setPrincipal('');
             setInterest('');
             setFees('');
+            setFiles([]);
             setDate(new Date().toISOString().split('T')[0]);
+            setIsSubmitting(false);
         }
     };
 
@@ -98,7 +104,8 @@ export default function PaymentForm({ onAdd }) {
                     />
                 </div>
 
-                <button type="submit" className="btn-primary">Add Payment</button>
+                <FileDropzone files={files} setFiles={setFiles} />
+                <button type="submit" className="btn-primary" disabled={isSubmitting}>{isSubmitting ? 'Adding...' : 'Add Payment'}</button>
             </form>
         </section>
     );
