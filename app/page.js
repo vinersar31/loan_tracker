@@ -12,7 +12,7 @@ import Login from "@/components/Login";
 
 export default function Home() {
   const { user, loading: authLoading, logout } = useAuth();
-  const { stats, schedule, addPayment, updatePayment, deletePayment } = useLoanData();
+  const { stats, schedule, addPayment, updatePayment, deletePayment, uploadDocuments, deleteDocument } = useLoanData();
 
   if (authLoading) {
       return (
@@ -68,6 +68,8 @@ export default function Home() {
             schedule={schedule}
             onDelete={deletePayment}
             onUpdate={updatePayment}
+            onUploadDocuments={uploadDocuments}
+            onDeleteDocument={deleteDocument}
           />
         </main>
       </div>

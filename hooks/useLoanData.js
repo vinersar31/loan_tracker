@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { db, auth } from '@/utils/firebase';
+import { db, storage, auth } from '@/utils/firebase';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 
 const DEFAULT_LOAN_AMOUNT = 412110.84; // User's specific amount
@@ -158,14 +159,18 @@ export function useLoanData() {
         return () => unsubscribe();
     }, [calculateSchedule]);
 
-    const addPayment = async (data) => {
+    const addPayment = async (data, files = []) => {
         // data expects: { date, amount, principal, interest, fees }
         try {
             const docRef = await addDoc(collection(db, COLLECTION_NAME), {
                 ...data,
-                createdAt: new Date()
+                createdAt: new Date(),
+                documents: []
             });
             console.log("Payment saved to Firestore successfully.");
+            if (files && files.length > 0) {
+                await uploadDocuments(docRef.id, files, []);
+            }
 
             const newPayment = { id: docRef.id, ...data };
             const updatedPayments = [...payments, newPayment];
@@ -229,5 +234,43 @@ export function useLoanData() {
         }
     };
 
-    return { stats, schedule, addPayment, updatePayment, deletePayment };
+
+    const uploadDocuments = async (paymentId, files, currentDocuments = []) => {
+        try {
+            const uploadedDocs = [];
+            for (const file of files) {
+                const fileRef = ref(storage, `payments/${paymentId}/${file.name}`);
+                await uploadBytes(fileRef, file);
+                const url = await getDownloadURL(fileRef);
+                uploadedDocs.push({ name: file.name, url, refPath: `payments/${paymentId}/${file.name}` });
+            }
+
+            const docRef = doc(db, COLLECTION_NAME, paymentId);
+            const newDocs = [...currentDocuments, ...uploadedDocs];
+            await updateDoc(docRef, { documents: newDocs });
+            return newDocs;
+        } catch (e) {
+            console.error("Error uploading documents:", e);
+            alert("Error uploading documents.");
+            return currentDocuments;
+        }
+    };
+
+    const deleteDocument = async (paymentId, documentPath, currentDocuments = []) => {
+        try {
+            const fileRef = ref(storage, documentPath);
+            await deleteObject(fileRef);
+
+            const newDocs = currentDocuments.filter(doc => doc.refPath !== documentPath);
+            const docRef = doc(db, COLLECTION_NAME, paymentId);
+            await updateDoc(docRef, { documents: newDocs });
+            return newDocs;
+        } catch (e) {
+            console.error("Error deleting document:", e);
+            alert("Error deleting document.");
+            return currentDocuments;
+        }
+    };
+
+    return { stats, schedule, addPayment, updatePayment, deletePayment, uploadDocuments, deleteDocument };
 }
