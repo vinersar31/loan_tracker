@@ -63,3 +63,12 @@ Create these Firestore collections:
 ## License
 
 This project is open source and available under the MIT License.
+
+### Firebase Trigger Email Extension
+
+To enable automatic email notifications when a payment is added or removed, install the **Trigger Email from Firestore** extension in your Firebase project.
+
+- Collection path: \`mail\`
+- SMTP connection URI: Provide your SMTP credentials.
+
+Emails will be sent automatically to the currently authenticated user's email address.
