@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { db } from '@/utils/firebase';
+import { db, auth } from '@/utils/firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 
 const DEFAULT_LOAN_AMOUNT = 412110.84; // User's specific amount
@@ -14,6 +14,77 @@ export function useLoanData() {
         percentage: 0
     });
     const [schedule, setSchedule] = useState([]);
+
+    const sendEmailNotification = async (updatedPayments, subject, htmlBody) => {
+        try {
+            if (!auth.currentUser || !auth.currentUser.email) {
+                console.warn("No logged in user found to send email to.");
+                return;
+            }
+
+            // Generate Excel base64
+            const XLSX = await import('xlsx');
+
+            const sortedPayments = [...updatedPayments].sort((a, b) => new Date(a.date) - new Date(b.date));
+            const DEFAULT_LOAN_AMOUNT = 412110.84;
+            let currentBalance = DEFAULT_LOAN_AMOUNT;
+
+            const calculatedSchedule = sortedPayments.map(payment => {
+                const principal = parseFloat(payment.principal || 0);
+                const amount = parseFloat(payment.amount || 0);
+                const fees = parseFloat(payment.fees || 0);
+                const interest = amount - principal - fees;
+
+                currentBalance -= principal;
+                if (currentBalance < 0) currentBalance = 0;
+
+                return {
+                    ...payment,
+                    amount,
+                    principal,
+                    interest,
+                    fees,
+                    remainingBalance: currentBalance
+                };
+            });
+
+            const reversedSchedule = calculatedSchedule.reverse();
+
+            const dataToExport = reversedSchedule.map(item => ({
+                Date: item.date,
+                Principal: item.principal,
+                Interest: item.interest,
+                Fees: item.fees,
+                Total: item.amount,
+                RemainingBalance: item.remainingBalance
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Payment History");
+            const excelBase64 = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
+
+            // Add document to 'mail' collection for Firebase Trigger Email extension
+            await addDoc(collection(db, 'mail'), {
+                to: auth.currentUser.email,
+                message: {
+                    subject: subject,
+                    html: htmlBody,
+                    attachments: [
+                        {
+                            filename: 'Mortgage_Payments_History.xlsx',
+                            content: excelBase64,
+                            encoding: 'base64'
+                        }
+                    ]
+                }
+            });
+            console.log("Email queued successfully to " + auth.currentUser.email);
+        } catch (err) {
+            console.error("Failed to send email notification:", err);
+        }
+    };
+
 
     const calculateSchedule = useCallback((currentPayments) => {
         // Sort payments by date ASCENDING for calculation
@@ -90,11 +161,29 @@ export function useLoanData() {
     const addPayment = async (data) => {
         // data expects: { date, amount, principal, interest, fees }
         try {
-            await addDoc(collection(db, COLLECTION_NAME), {
+            const docRef = await addDoc(collection(db, COLLECTION_NAME), {
                 ...data,
                 createdAt: new Date()
             });
             console.log("Payment saved to Firestore successfully.");
+
+            const newPayment = { id: docRef.id, ...data };
+            const updatedPayments = [...payments, newPayment];
+
+            const htmlBody = `
+                <h2>New Payment Added</h2>
+                <p>A new mortgage payment has been recorded with the following details:</p>
+                <ul>
+                    <li><strong>Date:</strong> ${data.date}</li>
+                    <li><strong>Total Amount:</strong> ${data.amount} RON</li>
+                    <li><strong>Principal:</strong> ${data.principal} RON</li>
+                    <li><strong>Fees:</strong> ${data.fees || 0} RON</li>
+                </ul>
+                <p>Please find the updated payment history attached.</p>
+            `;
+
+            await sendEmailNotification(updatedPayments, "New Mortgage Payment Added", htmlBody);
+
         } catch (e) {
             console.error("Error adding document: ", e);
             alert("Error saving payment.");
@@ -114,7 +203,25 @@ export function useLoanData() {
     const deletePayment = async (id) => {
         if (confirm('Are you sure you want to delete this payment?')) {
             try {
+                const paymentToDelete = payments.find(p => p.id === id);
                 await deleteDoc(doc(db, COLLECTION_NAME, id));
+
+                if (paymentToDelete) {
+                    const updatedPayments = payments.filter(p => p.id !== id);
+
+                    const htmlBody = `
+                        <h2>Payment Removed</h2>
+                        <p>A mortgage payment has been removed with the following details:</p>
+                        <ul>
+                            <li><strong>Date:</strong> ${paymentToDelete.date}</li>
+                            <li><strong>Total Amount:</strong> ${paymentToDelete.amount} RON</li>
+                            <li><strong>Principal:</strong> ${paymentToDelete.principal} RON</li>
+                        </ul>
+                        <p>Please find the updated payment history attached.</p>
+                    `;
+
+                    await sendEmailNotification(updatedPayments, "Mortgage Payment Removed", htmlBody);
+                }
             } catch (e) {
                 console.error("Error deleting document: ", e);
                 alert("Error deleting payment.");
