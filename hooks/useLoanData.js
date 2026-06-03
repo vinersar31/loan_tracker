@@ -17,7 +17,6 @@ export function useLoanData() {
     });
     const [schedule, setSchedule] = useState([]);
 
-
     const sendEmailNotification = async (updatedPayments, subject, htmlBody) => {
         try {
             if (!auth.currentUser || !auth.currentUser.email) {
@@ -190,6 +189,7 @@ export function useLoanData() {
             `;
 
             await sendEmailNotification(updatedPayments, "New Mortgage Payment Added", htmlBody);
+
         } catch (e) {
             console.error("Error adding document: ", e);
             alert("Error saving payment.");
