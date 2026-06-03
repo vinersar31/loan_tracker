@@ -17,6 +17,7 @@ export function useLoanData() {
     });
     const [schedule, setSchedule] = useState([]);
 
+
     const sendEmailNotification = async (updatedPayments, subject, htmlBody) => {
         try {
             if (!auth.currentUser || !auth.currentUser.email) {

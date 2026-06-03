@@ -1,0 +1,26 @@
+--- hooks/useLoanData.js
++++ hooks/useLoanData.js
+@@ -165,11 +165,6 @@
+                 documents: []
+             });
+             console.log("Payment saved to Firestore successfully.");
+-<<<<<<< HEAD
+-
+-            if (files && files.length > 0) {
+-                await uploadDocuments(docRef.id, files, []);
+-            }
+-=======
+
+             const newPayment = { id: docRef.id, ...data };
+             const updatedPayments = [...payments, newPayment];
+@@ -188,8 +183,10 @@
+
+             await sendEmailNotification(updatedPayments, "New Mortgage Payment Added", htmlBody);
+
+->>>>>>> origin/main
++            if (files && files.length > 0) {
++                await uploadDocuments(docRef.id, files, []);
++            }
+         } catch (e) {
+             console.error("Error adding document: ", e);
+             alert("Error saving payment.");
