@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { db, storage, auth } from '@/utils/firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { DEFAULT_LOAN_AMOUNT } from "@/utils/constants";
 import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 
-const DEFAULT_LOAN_AMOUNT = 412110.84; // User's specific amount
+
 const COLLECTION_NAME = 'payments';
 
 export function useLoanData() {
@@ -27,7 +28,7 @@ export function useLoanData() {
             const XLSX = await import('xlsx');
 
             const sortedPayments = [...updatedPayments].sort((a, b) => new Date(a.date) - new Date(b.date));
-            const DEFAULT_LOAN_AMOUNT = 412110.84;
+
             let currentBalance = DEFAULT_LOAN_AMOUNT;
 
             const calculatedSchedule = sortedPayments.map(payment => {

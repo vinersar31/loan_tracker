@@ -1,6 +1,7 @@
 const admin = require('firebase-admin');
 const XLSX = require('xlsx');
 const fs = require('fs');
+const { DEFAULT_LOAN_AMOUNT } = require("../utils/constants");
 
 async function main() {
     console.log("Starting export process...");
@@ -50,7 +51,7 @@ async function main() {
         // Calculate schedule logic similar to useLoanData.js
         const sortedPayments = [...payments].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        const DEFAULT_LOAN_AMOUNT = 412110.84;
+
         let currentBalance = DEFAULT_LOAN_AMOUNT;
 
         const calculatedSchedule = sortedPayments.map(payment => {
