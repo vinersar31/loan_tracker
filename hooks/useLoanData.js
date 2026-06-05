@@ -1,3 +1,4 @@
+import { escapeHtml } from "../utils/sanitize";
 import { useState, useEffect, useCallback } from 'react';
 import { db, storage, auth } from '@/utils/firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
@@ -179,10 +180,10 @@ export function useLoanData() {
                 <h2>New Payment Added</h2>
                 <p>A new mortgage payment has been recorded with the following details:</p>
                 <ul>
-                    <li><strong>Date:</strong> ${data.date}</li>
-                    <li><strong>Total Amount:</strong> ${data.amount} RON</li>
-                    <li><strong>Principal:</strong> ${data.principal} RON</li>
-                    <li><strong>Fees:</strong> ${data.fees || 0} RON</li>
+                    <li><strong>Date:</strong> ${escapeHtml(data.date)}</li>
+                    <li><strong>Total Amount:</strong> ${escapeHtml(data.amount)} RON</li>
+                    <li><strong>Principal:</strong> ${escapeHtml(data.principal)} RON</li>
+                    <li><strong>Fees:</strong> ${escapeHtml(data.fees || 0)} RON</li>
                 </ul>
                 <p>Please find the updated payment history attached.</p>
             `;
@@ -218,9 +219,9 @@ export function useLoanData() {
                         <h2>Payment Removed</h2>
                         <p>A mortgage payment has been removed with the following details:</p>
                         <ul>
-                            <li><strong>Date:</strong> ${paymentToDelete.date}</li>
-                            <li><strong>Total Amount:</strong> ${paymentToDelete.amount} RON</li>
-                            <li><strong>Principal:</strong> ${paymentToDelete.principal} RON</li>
+                            <li><strong>Date:</strong> ${escapeHtml(paymentToDelete.date)}</li>
+                            <li><strong>Total Amount:</strong> ${escapeHtml(paymentToDelete.amount)} RON</li>
+                            <li><strong>Principal:</strong> ${escapeHtml(paymentToDelete.principal)} RON</li>
                         </ul>
                         <p>Please find the updated payment history attached.</p>
                     `;
