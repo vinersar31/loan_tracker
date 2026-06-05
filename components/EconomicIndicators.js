@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     DndContext,
     closestCenter,
@@ -12,10 +12,8 @@ import {
     arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
-    verticalListSortingStrategy,
     horizontalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { formatCurrency } from "@/utils/format";
 import { getAllIndicators } from '@/utils/bnrData';
 import { db } from '@/utils/firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
