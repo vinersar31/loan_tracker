@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -21,7 +22,11 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "eslint": "^9.39.4",
-    "eslint-config-next": "^15.5.15"
+    "eslint-config-next": "^15.5.15",
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1"
   }
 }
