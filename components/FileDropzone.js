@@ -1,4 +1,6 @@
+"use client";
 import { useState, useRef } from 'react';
+import { FileText, Upload, X } from 'lucide-react';
 
 export default function FileDropzone({ files, setFiles, accept = ".pdf", maxFiles = 5 }) {
     const [isDragging, setIsDragging] = useState(false);
@@ -61,24 +63,18 @@ export default function FileDropzone({ files, setFiles, accept = ".pdf", maxFile
     };
 
     return (
-        <div className="file-dropzone-container" style={{ margin: '16px 0' }}>
+        <div>
             <div
-                className={`dropzone ${isDragging ? 'dragging' : ''}`}
+                className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-6 text-center text-sm transition-colors ${
+                    isDragging
+                        ? 'border-primary bg-primary/10 text-main'
+                        : 'border-hairline/20 bg-surface-hi/40 text-secondary hover:border-primary/40'
+                }`}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current.click()}
-                style={{
-                    border: isDragging ? '2px dashed var(--primary)' : '2px dashed var(--glass-border)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '24px',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    backgroundColor: isDragging ? 'rgba(108, 93, 211, 0.1)' : 'rgba(255, 255, 255, 0.02)',
-                    transition: 'all 0.2s ease',
-                    color: 'var(--text-secondary)'
-                }}
             >
                 <input
                     type="file"
@@ -86,44 +82,33 @@ export default function FileDropzone({ files, setFiles, accept = ".pdf", maxFile
                     onChange={handleChange}
                     accept={accept}
                     multiple
-                    style={{ display: 'none' }}
+                    className="hidden"
                 />
-                <p>Drag and drop PDF files here, or click to select files</p>
+                <Upload size={20} />
+                <p>Drag &amp; drop PDFs here, or click to browse</p>
             </div>
 
             {files.length > 0 && (
-                <div className="file-list" style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="mt-3 space-y-2">
                     {files.map((file, index) => (
-                        <div key={index} className="file-item" style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '8px 12px',
-                            background: 'var(--surface-highlight)',
-                            borderRadius: '8px',
-                            fontSize: '14px'
-                        }}>
-                            <span style={{
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                maxWidth: '80%'
-                            }}>📄 {file.name}</span>
+                        <div
+                            key={index}
+                            className="flex items-center justify-between gap-2 rounded-lg bg-surface-hi px-3 py-2 text-sm"
+                        >
+                            <span className="flex min-w-0 items-center gap-2 text-secondary">
+                                <FileText size={15} className="shrink-0" />
+                                <span className="truncate">{file.name}</span>
+                            </span>
                             <button
                                 type="button"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     removeFile(index);
                                 }}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: 'var(--danger)',
-                                    cursor: 'pointer',
-                                    fontSize: '16px'
-                                }}
+                                className="rounded p-1 text-dim transition-colors hover:text-danger"
+                                aria-label="Remove file"
                             >
-                                ✕
+                                <X size={15} />
                             </button>
                         </div>
                     ))}

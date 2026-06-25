@@ -1,99 +1,107 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+"use client";
+import { PieChart as PieIcon } from "lucide-react";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
-const formatCurrency = (value) => {
-    return new Intl.NumberFormat('ro-RO', {
-        style: 'currency',
-        currency: 'RON',
-        minimumFractionDigits: 2
-    }).format(value);
-}
+const formatCurrency = (value) =>
+  new Intl.NumberFormat("ro-RO", {
+    style: "currency",
+    currency: "RON",
+    minimumFractionDigits: 2,
+  }).format(value || 0);
 
-const CustomTooltip = ({ active, payload, totalPaid }) => {
-    if (active && payload && payload.length) {
-        return (
-            <div style={{
-                background: 'var(--surface)',
-                border: 'var(--glass-border)',
-                padding: '12px',
-                borderRadius: 'var(--radius-md)',
-                boxShadow: 'var(--shadow-card)'
-            }}>
-                <p style={{
-                    margin: '0 0 5px 0',
-                    fontWeight: '600',
-                    color: payload[0].payload.color
-                }}>
-                    {payload[0].name}
-                </p>
-                <p style={{
-                    margin: 0,
-                    color: 'var(--text-main)',
-                    fontWeight: '700'
-                }}>
-                    {formatCurrency(payload[0].value)}
-                </p>
-                <p style={{
-                    margin: '5px 0 0 0',
-                    fontSize: '12px',
-                    color: 'var(--text-secondary)'
-                }}>
-                    {((payload[0].value / totalPaid) * 100).toFixed(1)}% of total
-                </p>
-            </div>
-        );
-    }
-    return null;
-};
+const COLORS = { Principal: "#6C5DD3", Interest: "#FFA600", Fees: "#FF754C" };
 
 export default function PaymentBreakdownChart({ stats }) {
-    // Only show the chart if we have some data
-    if (!stats || (stats.totalPrincipal === 0 && stats.totalInterest === 0 && stats.totalFees === 0)) {
-        return (
-            <div className="chart-card empty-chart">
-                <h3>Payment Breakdown</h3>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '220px', color: 'var(--text-secondary)' }}>
-                    No payment data available yet.
-                </div>
-            </div>
-        );
-    }
+  const empty =
+    !stats ||
+    (stats.totalPrincipal === 0 &&
+      stats.totalInterest === 0 &&
+      stats.totalFees === 0);
 
-    const data = [
-        { name: 'Principal', value: stats.totalPrincipal, color: 'var(--primary)' },
-        { name: 'Interest', value: stats.totalInterest, color: '#f59e0b' },
-        { name: 'Fees', value: stats.totalFees, color: '#ec4899' }
-    ].filter(item => item.value > 0); // Only show non-zero segments
+  const data = [
+    { name: "Principal", value: stats?.totalPrincipal || 0, color: COLORS.Principal },
+    { name: "Interest", value: stats?.totalInterest || 0, color: COLORS.Interest },
+    { name: "Fees", value: stats?.totalFees || 0, color: COLORS.Fees },
+  ].filter((d) => d.value > 0);
+  const total = data.reduce((s, d) => s + d.value, 0);
 
+  const Custom = ({ active, payload }) => {
+    if (!active || !payload?.length) return null;
+    const p = payload[0];
     return (
-        <div className="chart-card">
-            <h3>Payment Breakdown</h3>
-            <div style={{ width: '100%', height: '220px', minHeight: '220px' }}>
-                <ResponsiveContainer width="100%" height={220}>
-                    <PieChart>
-                        <Pie
-                            data={data}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={5}
-                            dataKey="value"
-                            stroke="none"
-                        >
-                            {data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                        </Pie>
-                        <Tooltip content={<CustomTooltip totalPaid={stats.totalPaid} />} />
-                        <Legend
-                            verticalAlign="bottom"
-                            height={36}
-                            iconType="circle"
-                            formatter={(value, entry) => <span style={{ color: 'var(--text-main)' }}>{value}</span>}
-                        />
-                    </PieChart>
-                </ResponsiveContainer>
-            </div>
-        </div>
+      <div className="rounded-xl border border-hairline/10 bg-surface px-3 py-2 shadow-card">
+        <p className="text-xs" style={{ color: p.payload.color }}>
+          {p.name}
+        </p>
+        <p className="text-sm font-semibold text-main tabular">
+          {formatCurrency(p.value)} · {total ? ((p.value / total) * 100).toFixed(1) : 0}%
+        </p>
+      </div>
     );
+  };
+
+  return (
+    <div className="card flex flex-col p-5">
+      <header className="mb-2 flex items-center gap-2">
+        <PieIcon size={16} className="text-accent" />
+        <h2 className="text-sm font-semibold text-main">Payment breakdown</h2>
+      </header>
+
+      {empty ? (
+        <div className="flex h-[220px] items-center justify-center text-sm text-secondary">
+          No payment data yet.
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={62}
+                  outerRadius={88}
+                  paddingAngle={3}
+                  stroke="none"
+                >
+                  {data.map((e) => (
+                    <Cell key={e.name} fill={e.color} />
+                  ))}
+                </Pie>
+                <Tooltip content={<Custom />} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-xs text-secondary">Total paid</span>
+              <span className="text-base font-bold text-main tabular">
+                {new Intl.NumberFormat("ro-RO", {
+                  notation: "compact",
+                  maximumFractionDigits: 1,
+                }).format(total)}
+              </span>
+            </div>
+          </div>
+          <ul className="w-full space-y-1.5">
+            {data.map((e) => (
+              <li key={e.name} className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2 text-secondary">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: e.color }}
+                  />
+                  {e.name}
+                </span>
+                <span className="tabular text-main">
+                  {total ? ((e.value / total) * 100).toFixed(0) : 0}%
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 }

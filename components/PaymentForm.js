@@ -1,10 +1,10 @@
+"use client";
 import { useState, useMemo } from 'react';
+import { Plus } from 'lucide-react';
 import FileDropzone from './FileDropzone';
 
 export default function PaymentForm({ onAdd }) {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-
-    // Split fields
     const [principal, setPrincipal] = useState('');
     const [interest, setInterest] = useState('');
     const [fees, setFees] = useState('');
@@ -31,7 +31,6 @@ export default function PaymentForm({ onAdd }) {
                 fees: parseFloat(fees) || 0
             }, files);
 
-            // Reset
             setPrincipal('');
             setInterest('');
             setFees('');
@@ -42,12 +41,15 @@ export default function PaymentForm({ onAdd }) {
     };
 
     return (
-        <section className="input-section">
-            <h2>Add Payment</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="date">Date</label>
+        <section className="card p-5 sm:p-6">
+            <h2 className="mb-5 flex items-center gap-2 text-base font-semibold text-main">
+                <Plus size={18} className="text-primary" /> Add payment
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label className="label" htmlFor="date">Date</label>
                     <input
+                        className="input"
                         type="date"
                         id="date"
                         required
@@ -56,56 +58,30 @@ export default function PaymentForm({ onAdd }) {
                     />
                 </div>
 
-                <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                    <div className="form-group">
-                        <label htmlFor="principal">Principal</label>
-                        <input
-                            type="number"
-                            id="principal"
-                            placeholder="0.00"
-                            step="0.01"
-                            value={principal}
-                            onChange={(e) => setPrincipal(e.target.value)}
-                        />
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div>
+                        <label className="label" htmlFor="principal">Principal</label>
+                        <input className="input" type="number" id="principal" placeholder="0.00" step="0.01" value={principal} onChange={(e) => setPrincipal(e.target.value)} />
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="interest">Interest</label>
-                        <input
-                            type="number"
-                            id="interest"
-                            placeholder="0.00"
-                            step="0.01"
-                            value={interest}
-                            onChange={(e) => setInterest(e.target.value)}
-                        />
+                    <div>
+                        <label className="label" htmlFor="interest">Interest</label>
+                        <input className="input" type="number" id="interest" placeholder="0.00" step="0.01" value={interest} onChange={(e) => setInterest(e.target.value)} />
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="fees">Fees</label>
-                        <input
-                            type="number"
-                            id="fees"
-                            placeholder="0.00"
-                            step="0.01"
-                            value={fees}
-                            onChange={(e) => setFees(e.target.value)}
-                        />
+                    <div>
+                        <label className="label" htmlFor="fees">Fees</label>
+                        <input className="input" type="number" id="fees" placeholder="0.00" step="0.01" value={fees} onChange={(e) => setFees(e.target.value)} />
                     </div>
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="total">Total Amount (Auto-calculated)</label>
-                    <input
-                        type="number"
-                        id="total"
-                        placeholder="0.00"
-                        readOnly
-                        value={total}
-                        style={{ backgroundColor: 'rgba(255,255,255,0.05)', cursor: 'not-allowed' }}
-                    />
+                <div>
+                    <label className="label" htmlFor="total">Total (auto-calculated)</label>
+                    <input className="input cursor-not-allowed opacity-70" type="number" id="total" placeholder="0.00" readOnly value={total} />
                 </div>
 
                 <FileDropzone files={files} setFiles={setFiles} />
-                <button type="submit" className="btn-primary" disabled={isSubmitting}>{isSubmitting ? 'Adding...' : 'Add Payment'}</button>
+                <button type="submit" className="btn-primary w-full" disabled={isSubmitting}>
+                    {isSubmitting ? 'Adding…' : 'Add payment'}
+                </button>
             </form>
         </section>
     );

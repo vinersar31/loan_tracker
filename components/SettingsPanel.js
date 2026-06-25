@@ -1,138 +1,120 @@
 "use client";
-import { useState } from 'react';
-import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { useState } from "react";
+import { Settings, X } from "lucide-react";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
+
+const STAT_CARDS = [
+  { id: "totalLoan", name: "Original loan" },
+  { id: "totalPaid", name: "Total paid" },
+  { id: "totalPrincipal", name: "Principal paid" },
+  { id: "totalInterest", name: "Interest paid" },
+  { id: "totalFees", name: "Fees paid" },
+  { id: "remaining", name: "Remaining" },
+];
+
+const INDICATORS = [
+  { id: "eurRate", name: "EUR / RON" },
+  { id: "robor3m", name: "ROBOR 3M" },
+  { id: "robor6m", name: "ROBOR 6M" },
+  { id: "ircc", name: "IRCC" },
+];
+
+function Toggle({ label, checked, onChange }) {
+  return (
+    <button
+      type="button"
+      onClick={onChange}
+      className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-surface-hi"
+    >
+      <span className={checked ? "text-main" : "text-secondary"}>{label}</span>
+      <span
+        className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+          checked ? "bg-primary" : "bg-surface-hi"
+        }`}
+      >
+        <span
+          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${
+            checked ? "translate-x-4" : "translate-x-0.5"
+          }`}
+        />
+      </span>
+    </button>
+  );
+}
 
 export default function SettingsPanel() {
-    const { prefs, updatePrefs, mounted } = useUserPreferences();
-    const [isOpen, setIsOpen] = useState(false);
+  const { mounted, toggleStatCard, toggleIndicator, isHidden } =
+    useUserPreferences();
+  const [isOpen, setIsOpen] = useState(false);
 
-    const statCards = [
-        { id: 'remaining', name: 'Remaining' },
-        { id: 'totalPrincipal', name: 'Total Principal' },
-        { id: 'totalInterest', name: 'Total Interest' },
-        { id: 'totalFees', name: 'Fees' },
-        { id: 'totalPaid', name: 'Total Paid' }
-    ];
+  return (
+    <div className="relative">
+      <button
+        className="icon-btn"
+        onClick={() => setIsOpen(!isOpen)}
+        title="Customize dashboard"
+        aria-label="Settings"
+      >
+        <Settings size={18} />
+      </button>
 
-    const indicators = [
-        { id: 'eurRon', name: 'EUR/RON' },
-        { id: 'policyRate', name: 'Policy Rate' },
-        { id: 'inflation', name: 'Inflation' },
-        { id: 'robor3m', name: 'ROBOR 3M' },
-        { id: 'robor6m', name: 'ROBOR 6M' },
-        { id: 'ircc', name: 'IRCC' }
-    ];
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="card absolute right-0 z-50 mt-2 w-72 animate-fade-in-up p-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-main">
+                Customize dashboard
+              </h3>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="rounded-lg p-1 text-secondary transition-colors hover:text-main"
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
 
-    const toggleStatCard = (id) => {
-        console.log('Toggle stat card:', id);
-        const current = prefs.hiddenStats || [];
-        const updated = current.includes(id)
-            ? current.filter(item => item !== id)
-            : [...current, id];
-        console.log('Updated hidden stats:', updated);
-        updatePrefs({ hiddenStats: updated });
-    };
+            {!mounted ? (
+              <p className="py-8 text-center text-sm text-dim">Loading…</p>
+            ) : (
+              <>
+                <div className="mt-4">
+                  <p className="stat-label mb-2">Stat cards</p>
+                  <div className="space-y-1">
+                    {STAT_CARDS.map((c) => (
+                      <Toggle
+                        key={c.id}
+                        label={c.name}
+                        checked={!isHidden(c.id, "statCard")}
+                        onChange={() => toggleStatCard(c.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
 
-    const toggleIndicator = (id) => {
-        console.log('Toggle indicator:', id);
-        const current = prefs.hiddenIndicators || [];
-        const updated = current.includes(id)
-            ? current.filter(item => item !== id)
-            : [...current, id];
-        console.log('Updated hidden indicators:', updated);
-        updatePrefs({ hiddenIndicators: updated });
-    };
+                <div className="mt-4">
+                  <p className="stat-label mb-2">Economic indicators</p>
+                  <div className="space-y-1">
+                    {INDICATORS.map((c) => (
+                      <Toggle
+                        key={c.id}
+                        label={c.name}
+                        checked={!isHidden(c.id, "indicator")}
+                        onChange={() => toggleIndicator(c.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
 
-    const isStatHidden = (id) => (prefs.hiddenStats || []).includes(id);
-    const isIndicatorHidden = (id) => (prefs.hiddenIndicators || []).includes(id);
-
-    return (
-        <div className="settings-panel-container">
-            <button
-                className="settings-toggle"
-                onClick={() => setIsOpen(!isOpen)}
-                title="Customize Dashboard"
-            >
-                ⚙️
-            </button>
-
-            {isOpen && (
-                <>
-                    <div className="settings-backdrop" onClick={() => setIsOpen(false)} />
-                    <div className="settings-panel">
-                        <div className="settings-header">
-                            <h3>Customize Dashboard</h3>
-                            <button onClick={() => setIsOpen(false)} className="close-btn">✕</button>
-                        </div>
-
-                        {!mounted ? (
-                            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-dim)' }}>
-                                Loading preferences...
-                            </div>
-                        ) : (
-                            <>
-                                <div className="settings-section">
-                                    <h4>Stat Cards</h4>
-                                    <div className="checkbox-grid">
-                                        {statCards.map(card => (
-                                            <label
-                                                key={card.id}
-                                                className="checkbox-label"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    toggleStatCard(card.id);
-                                                }}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!isStatHidden(card.id)}
-                                                    onChange={(e) => {
-                                                        e.stopPropagation();
-                                                        toggleStatCard(card.id);
-                                                    }}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                />
-                                                <span>{card.name}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="settings-section">
-                                    <h4>Economic Indicators</h4>
-                                    <div className="checkbox-grid">
-                                        {indicators.map(indicator => (
-                                            <label
-                                                key={indicator.id}
-                                                className="checkbox-label"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    toggleIndicator(indicator.id);
-                                                }}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!isIndicatorHidden(indicator.id)}
-                                                    onChange={(e) => {
-                                                        e.stopPropagation();
-                                                        toggleIndicator(indicator.id);
-                                                    }}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                />
-                                                <span>{indicator.name}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="settings-footer">
-                                    <p className="settings-hint">💡 Drag stat cards to reorder them</p>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </>
+                <p className="mt-3 border-t border-hairline/10 pt-3 text-xs text-dim">
+                  Tip: drag stat cards to reorder them.
+                </p>
+              </>
             )}
-        </div>
-    );
+          </div>
+        </>
+      )}
+    </div>
+  );
 }

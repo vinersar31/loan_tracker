@@ -12,8 +12,9 @@ import {
     arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
-    horizontalListSortingStrategy,
+    rectSortingStrategy,
 } from '@dnd-kit/sortable';
+import { Euro, Percent, TrendingUp } from 'lucide-react';
 import { getAllIndicators } from '@/utils/bnrData';
 import { db } from '@/utils/firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
@@ -102,24 +103,32 @@ export default function EconomicIndicators() {
 
     const allCards = {
         eurRate: {
-            title: "EUR Exchange Rate (BNR)",
+            title: "EUR / RON (BNR)",
             value: indicators.eur_rate ? `${indicators.eur_rate.toFixed(4)} RON` : 'N/A',
-            subValue: indicators.eur_date
+            subValue: indicators.eur_date,
+            icon: Euro,
+            accent: '#00E096'
         },
         robor3m: {
             title: "ROBOR 3M",
             value: indicators.robor_3m ? `${indicators.robor_3m.toFixed(2)}%` : 'N/A',
-            subValue: indicators.robor_date
+            subValue: indicators.robor_date,
+            icon: Percent,
+            accent: '#FFA600'
         },
         robor6m: {
             title: "ROBOR 6M",
             value: indicators.robor_6m ? `${indicators.robor_6m.toFixed(2)}%` : 'N/A',
-            subValue: indicators.robor_date
+            subValue: indicators.robor_date,
+            icon: Percent,
+            accent: '#FF754C'
         },
         ircc: {
             title: "IRCC",
             value: indicators.ircc ? `${indicators.ircc.toFixed(2)}%` : 'N/A',
-            subValue: indicators.ircc_date
+            subValue: indicators.ircc_date,
+            icon: TrendingUp,
+            accent: '#8B7CE8'
         }
     };
 
@@ -130,11 +139,9 @@ export default function EconomicIndicators() {
     if (visibleCards.length === 0) return null;
 
     return (
-        <section className="dashboard" style={{ marginTop: '0', marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '16px', color: 'var(--text-secondary)', marginBottom: '-10px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Economic Indicators
-            </h2>
-            <div className="stats-grid">
+        <section className="space-y-3">
+            <h2 className="stat-label">Economic indicators</h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
@@ -142,7 +149,7 @@ export default function EconomicIndicators() {
                 >
                     <SortableContext
                         items={visibleCards}
-                        strategy={horizontalListSortingStrategy}
+                        strategy={rectSortingStrategy}
                     >
                         {visibleCards.map(id => (
                             <SortableCard
@@ -151,7 +158,9 @@ export default function EconomicIndicators() {
                                 title={allCards[id].title}
                                 value={allCards[id].value}
                                 subValue={allCards[id].subValue}
-                                subValuePrefix="Valid from: "
+                                subValuePrefix="from "
+                                icon={allCards[id].icon}
+                                accent={allCards[id].accent}
                             />
                         ))}
                     </SortableContext>

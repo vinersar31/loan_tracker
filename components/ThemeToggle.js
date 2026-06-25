@@ -1,24 +1,22 @@
 "use client";
-import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { Moon, Sun } from "lucide-react";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 export default function ThemeToggle() {
-    const { prefs, updatePrefs, mounted } = useUserPreferences();
+  const { prefs, toggleTheme, mounted } = useUserPreferences();
 
-    const toggleTheme = () => {
-        const newTheme = prefs.theme === 'dark' ? 'light' : 'dark';
-        updatePrefs({ theme: newTheme });
-    };
+  // Prevent hydration mismatch
+  if (!mounted) return <div className="h-10 w-10" />;
 
-    // Prevent hydration mismatch
-    if (!mounted) return <div style={{ width: 48, height: 48 }} />;
-
-    return (
-        <button
-            onClick={toggleTheme}
-            className="theme-toggle"
-            title={`Switch to ${prefs.theme === 'dark' ? 'light' : 'dark'} mode`}
-        >
-            {prefs.theme === 'dark' ? '☀️' : '🌙'}
-        </button>
-    );
+  const isDark = prefs.theme === "dark";
+  return (
+    <button
+      onClick={toggleTheme}
+      className="icon-btn"
+      title={`Switch to ${isDark ? "light" : "dark"} mode`}
+      aria-label="Toggle theme"
+    >
+      {isDark ? <Sun size={18} /> : <Moon size={18} />}
+    </button>
+  );
 }
