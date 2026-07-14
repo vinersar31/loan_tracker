@@ -95,7 +95,7 @@ export default function PaymentBreakdownChart({ stats }) {
                   {e.name}
                 </span>
                 <span className="tabular text-main">
-                  {total ? ((e.value / total) * 100).toFixed(0) : 0}%
+                  {total ? ((e.value / total) * 100).toFixed(1) : 0}%
                 </span>
               </li>
             ))}
