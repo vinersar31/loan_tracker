@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { FileText, Upload, X } from "lucide-react";
 import FileDropzone from "./FileDropzone";
+import { isValidFirebaseUrl } from "../utils/sanitize";
 
 export default function ManageDocumentsModal({ payment, onClose, onUpload, onDeleteDocument }) {
   const [filesToAdd, setFilesToAdd] = useState([]);
@@ -49,7 +50,7 @@ export default function ManageDocumentsModal({ payment, onClose, onUpload, onDel
                   className="flex items-center justify-between gap-2 rounded-lg bg-surface-hi px-3 py-2 text-sm"
                 >
                   <a
-                    href={doc.url}
+                    href={isValidFirebaseUrl(doc.url) ? doc.url : "#"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex min-w-0 items-center gap-2 text-primary hover:underline"
