@@ -1,6 +1,5 @@
 const admin = require('firebase-admin');
 const XLSX = require('xlsx');
-const fs = require('fs');
 const { DEFAULT_LOAN_AMOUNT } = require("../utils/constants");
 
 async function main() {
