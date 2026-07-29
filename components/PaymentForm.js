@@ -3,6 +3,12 @@ import { useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';
 import FileDropzone from './FileDropzone';
 
+
+const safeParseFloat = (val) => {
+    const parsed = parseFloat(val);
+    return isNaN(parsed) ? 0 : parsed;
+};
+
 export default function PaymentForm({ onAdd }) {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [principal, setPrincipal] = useState('');
@@ -12,9 +18,9 @@ export default function PaymentForm({ onAdd }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const total = useMemo(() => {
-        const p = parseFloat(principal) || 0;
-        const i = parseFloat(interest) || 0;
-        const f = parseFloat(fees) || 0;
+        const p = safeParseFloat(principal);
+        const i = safeParseFloat(interest);
+        const f = safeParseFloat(fees);
         const sum = p + i + f;
         return sum > 0 ? sum.toFixed(2) : '';
     }, [principal, interest, fees]);
@@ -25,10 +31,10 @@ export default function PaymentForm({ onAdd }) {
             setIsSubmitting(true);
             await onAdd({
                 date,
-                amount: parseFloat(total) || 0,
-                principal: parseFloat(principal) || 0,
-                interest: parseFloat(interest) || 0,
-                fees: parseFloat(fees) || 0
+                amount: safeParseFloat(total),
+                principal: safeParseFloat(principal),
+                interest: safeParseFloat(interest),
+                fees: safeParseFloat(fees)
             }, files);
 
             setPrincipal('');
