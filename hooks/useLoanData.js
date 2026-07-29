@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { db, storage, auth } from '@/utils/firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { DEFAULT_LOAN_AMOUNT } from "@/utils/constants";
+import { calculateAmortizationSchedule } from "@/utils/calculations";
 import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 
 
@@ -28,28 +29,7 @@ export function useLoanData() {
             // Generate Excel base64
             const XLSX = await import('xlsx');
 
-            const sortedPayments = [...updatedPayments].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            let currentBalance = DEFAULT_LOAN_AMOUNT;
-
-            const calculatedSchedule = sortedPayments.map(payment => {
-                const principal = parseFloat(payment.principal || 0);
-                const amount = parseFloat(payment.amount || 0);
-                const fees = parseFloat(payment.fees || 0);
-                const interest = amount - principal - fees;
-
-                currentBalance -= principal;
-                if (currentBalance < 0) currentBalance = 0;
-
-                return {
-                    ...payment,
-                    amount,
-                    principal,
-                    interest,
-                    fees,
-                    remainingBalance: currentBalance
-                };
-            });
+            const { schedule: calculatedSchedule } = calculateAmortizationSchedule(updatedPayments, DEFAULT_LOAN_AMOUNT);
 
             const reversedSchedule = calculatedSchedule.reverse();
 
@@ -90,54 +70,13 @@ export function useLoanData() {
 
 
     const calculateSchedule = useCallback((currentPayments) => {
-        // Sort payments by date ASCENDING for calculation
-        const sortedPayments = [...currentPayments].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        let currentBalance = DEFAULT_LOAN_AMOUNT;
-        let totalPaid = 0;
-        let totalPrincipal = 0;
-        let totalInterest = 0;
-        let totalFees = 0;
-
-        const calculatedSchedule = sortedPayments.map(payment => {
-            const principal = parseFloat(payment.principal || 0);
-            const amount = parseFloat(payment.amount || 0);
-            const fees = parseFloat(payment.fees || 0);
-
-            const interest = amount - principal - fees;
-
-
-            currentBalance -= principal;
-            if (currentBalance < 0) currentBalance = 0;
-
-            totalPaid += amount;
-            totalPrincipal += principal;
-            totalInterest += interest;
-            totalFees += fees;
-
-            return {
-                ...payment,
-                amount,
-                principal,
-                interest,
-                fees,
-                remainingBalance: currentBalance
-            };
-        });
+        const { schedule, stats } = calculateAmortizationSchedule(currentPayments, DEFAULT_LOAN_AMOUNT);
 
         // Reverse for display (newest first)
-        const reversedSchedule = calculatedSchedule.reverse();
+        const reversedSchedule = schedule.reverse();
         setSchedule(reversedSchedule);
 
-        setStats({
-            totalLoan: DEFAULT_LOAN_AMOUNT,
-            totalPaid,
-            totalPrincipal,
-            totalInterest,
-            totalFees,
-            remaining: currentBalance,
-            percentage: Math.min(100, ((DEFAULT_LOAN_AMOUNT - currentBalance) / DEFAULT_LOAN_AMOUNT) * 100)
-        });
+        setStats(stats);
     }, []);
 
     // Subscribe to Firestore updates
