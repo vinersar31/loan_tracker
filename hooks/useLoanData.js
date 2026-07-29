@@ -239,13 +239,14 @@ export function useLoanData() {
 
     const uploadDocuments = async (paymentId, files, currentDocuments = []) => {
         try {
-            const uploadedDocs = [];
-            for (const file of files) {
-                const fileRef = ref(storage, `payments/${paymentId}/${file.name}`);
+            const uploadPromises = files.map(async (file) => {
+                const refPath = `payments/${paymentId}/${file.name}`;
+                const fileRef = ref(storage, refPath);
                 await uploadBytes(fileRef, file);
                 const url = await getDownloadURL(fileRef);
-                uploadedDocs.push({ name: file.name, url, refPath: `payments/${paymentId}/${file.name}` });
-            }
+                return { name: file.name, url, refPath };
+            });
+            const uploadedDocs = await Promise.all(uploadPromises);
 
             const docRef = doc(db, COLLECTION_NAME, paymentId);
             const newDocs = [...currentDocuments, ...uploadedDocs];
