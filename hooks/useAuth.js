@@ -6,23 +6,39 @@ import {
     onAuthStateChanged
 } from 'firebase/auth';
 
+// Helper to hash email client-side
+async function hashEmail(email) {
+    if (!email) return '';
+    const encoder = new TextEncoder();
+    const data = encoder.encode(email.toLowerCase().trim());
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+
 export function useAuth() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // Check if the logged-in user is the allowed user
-                if (process.env.NEXT_PUBLIC_ALLOWED_EMAIL && user.email !== process.env.NEXT_PUBLIC_ALLOWED_EMAIL) {
-                    firebaseSignOut(auth);
-                    setError("Unauthorized email address.");
-                    setUser(null);
-                } else {
-                    setUser(user);
-                    setError(null);
+                if (process.env.NEXT_PUBLIC_ALLOWED_EMAIL_HASH) {
+                    const hashedEmail = await hashEmail(user.email);
+                    if (hashedEmail !== process.env.NEXT_PUBLIC_ALLOWED_EMAIL_HASH) {
+                        firebaseSignOut(auth);
+                        setError("Unauthorized email address.");
+                        setUser(null);
+                        setLoading(false);
+                        return;
+                    }
                 }
+
+                setUser(user);
+                setError(null);
             } else {
                 setUser(null);
             }
@@ -36,8 +52,11 @@ export function useAuth() {
         setLoading(true);
         setError(null);
         try {
-            if (process.env.NEXT_PUBLIC_ALLOWED_EMAIL && email !== process.env.NEXT_PUBLIC_ALLOWED_EMAIL) {
-                throw new Error("Unauthorized email address.");
+            if (process.env.NEXT_PUBLIC_ALLOWED_EMAIL_HASH) {
+                const hashedEmail = await hashEmail(email);
+                if (hashedEmail !== process.env.NEXT_PUBLIC_ALLOWED_EMAIL_HASH) {
+                    throw new Error("Unauthorized email address.");
+                }
             }
             await signInWithEmailAndPassword(auth, email, password);
         } catch (err) {
