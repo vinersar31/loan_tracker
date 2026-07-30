@@ -62,7 +62,6 @@ export function useLoanData() {
                     ]
                 }
             });
-            console.log("Email queued successfully to " + auth.currentUser.email);
         } catch (err) {
             console.error("Failed to send email notification:", err);
         }
@@ -108,7 +107,6 @@ export function useLoanData() {
                 createdAt: new Date(),
                 documents: []
             });
-            console.log("Payment saved to Firestore successfully.");
             if (files && files.length > 0) {
                 await uploadDocuments(docRef.id, files, []);
             }
