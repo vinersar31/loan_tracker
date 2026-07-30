@@ -1,13 +1,8 @@
 "use client";
 import { PieChart as PieIcon } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { formatCurrency } from "@/utils/format";
 
-const formatCurrency = (value) =>
-  new Intl.NumberFormat("ro-RO", {
-    style: "currency",
-    currency: "RON",
-    minimumFractionDigits: 2,
-  }).format(value || 0);
 
 const COLORS = { Principal: "#6C5DD3", Interest: "#FFA600", Fees: "#FF754C" };
 

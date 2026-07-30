@@ -23,6 +23,7 @@ import {
     Wallet,
 } from 'lucide-react';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { formatCurrency } from '@/utils/format';
 import { SortableCard } from './SortableCard';
 import PaymentBreakdownChart from './PaymentBreakdownChart';
 import AmortizationChart from './AmortizationChart';
@@ -52,12 +53,6 @@ export default function Dashboard({ stats, schedule }) {
         };
     }, [mounted, prefs.statCardOrder]);
 
-    const formatCurrency = (value) =>
-        new Intl.NumberFormat('ro-RO', {
-            style: 'currency',
-            currency: 'RON',
-            minimumFractionDigits: 2,
-        }).format(value || 0);
 
     const handleDragEnd = (event) => {
         const { active, over } = event;
