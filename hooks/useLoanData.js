@@ -22,7 +22,6 @@ export function useLoanData() {
     const sendEmailNotification = async (updatedPayments, subject, htmlBody) => {
         try {
             if (!auth.currentUser || !auth.currentUser.email) {
-                console.warn("No logged in user found to send email to.");
                 return;
             }
 
