@@ -6,6 +6,8 @@ import { DEFAULT_LOAN_AMOUNT } from "@/utils/constants";
 import { calculateAmortizationSchedule } from "@/utils/calculations";
 import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 
+let cachedXLSX = null;
+
 
 const COLLECTION_NAME = 'payments';
 
@@ -27,7 +29,10 @@ export function useLoanData() {
             }
 
             // Generate Excel base64
-            const XLSX = await import('xlsx');
+            if (!cachedXLSX) {
+                cachedXLSX = await import('xlsx');
+            }
+            const XLSX = cachedXLSX;
 
             const { schedule: calculatedSchedule } = calculateAmortizationSchedule(updatedPayments, DEFAULT_LOAN_AMOUNT);
 
