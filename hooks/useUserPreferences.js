@@ -40,7 +40,6 @@ export function UserPreferencesProvider({ children }) {
             const newPrefs = { ...prev, [key]: value };
             try {
                 localStorage.setItem(PREFS_KEY, JSON.stringify(newPrefs));
-                console.log(`Updated preference ${key} to`, value);
             } catch (e) {
                 console.error("Failed to save preference", e);
             }
