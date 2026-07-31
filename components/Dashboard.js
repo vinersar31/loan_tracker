@@ -26,6 +26,7 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { SortableCard } from './SortableCard';
 import PaymentBreakdownChart from './PaymentBreakdownChart';
 import AmortizationChart from './AmortizationChart';
+import { formatCurrency } from '@/utils/format';
 
 export default function Dashboard({ stats, schedule }) {
     const { prefs, mounted, updatePreference, isHidden } = useUserPreferences();
@@ -51,13 +52,6 @@ export default function Dashboard({ stats, schedule }) {
             clearTimeout(timer);
         };
     }, [mounted, prefs.statCardOrder]);
-
-    const formatCurrency = (value) =>
-        new Intl.NumberFormat('ro-RO', {
-            style: 'currency',
-            currency: 'RON',
-            minimumFractionDigits: 2,
-        }).format(value || 0);
 
     const handleDragEnd = (event) => {
         const { active, over } = event;
