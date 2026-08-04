@@ -2,6 +2,38 @@
 import { useState, useRef } from 'react';
 import { FileText, Upload, X } from 'lucide-react';
 
+
+const validateFile = (file, acceptString) => {
+    if (!acceptString) return true;
+
+    const allowedExtensions = acceptString.split(',').map(ext => ext.trim().toLowerCase());
+    const fileName = file.name || '';
+    const fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+
+    if (!allowedExtensions.includes(fileExtension)) {
+        return false;
+    }
+
+    // Security fix: Validate MIME type to prevent malicious file renaming
+    const mimeTypes = {
+        '.pdf': 'application/pdf',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.doc': 'application/msword',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.xls': 'application/vnd.ms-excel',
+        '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    };
+
+    const expectedMimeType = mimeTypes[fileExtension];
+    if (expectedMimeType && file.type !== expectedMimeType) {
+        return false;
+    }
+
+    return true;
+};
+
 export default function FileDropzone({ files, setFiles, accept = ".pdf", maxFiles = 5 }) {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
@@ -33,7 +65,7 @@ export default function FileDropzone({ files, setFiles, accept = ".pdf", maxFile
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const newFiles = Array.from(e.dataTransfer.files).filter(file =>
-                accept.includes(file.name.substring(file.name.lastIndexOf('.')))
+                validateFile(file, accept)
             );
 
             if (files.length + newFiles.length > maxFiles) {
@@ -47,7 +79,9 @@ export default function FileDropzone({ files, setFiles, accept = ".pdf", maxFile
 
     const handleChange = (e) => {
         if (e.target.files && e.target.files.length > 0) {
-            const newFiles = Array.from(e.target.files);
+            const newFiles = Array.from(e.target.files).filter(file =>
+                validateFile(file, accept)
+            );
 
             if (files.length + newFiles.length > maxFiles) {
                 alert(`You can only upload up to ${maxFiles} files.`);
