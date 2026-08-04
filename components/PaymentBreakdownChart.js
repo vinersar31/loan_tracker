@@ -3,7 +3,6 @@ import { PieChart as PieIcon } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { formatCurrency } from "@/utils/format";
 
-
 const COLORS = { Principal: "#6C5DD3", Interest: "#FFA600", Fees: "#FF754C" };
 
 export default function PaymentBreakdownChart({ stats }) {

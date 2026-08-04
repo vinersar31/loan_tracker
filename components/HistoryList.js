@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import * as XLSX from "xlsx";
 import { Download, FileText, History, Trash2 } from "lucide-react";
 import ManageDocumentsModal from "./ManageDocumentsModal";
@@ -88,6 +88,19 @@ export default function HistoryList({ schedule, onDelete, onUpdate, onUploadDocu
         XLSX.writeFile(workbook, "Mortgage_Payments_History.xlsx");
     };
 
+    const processedSchedule = useMemo(() => {
+        return schedule.map((item) => {
+            const isMonthly = item.date && parseInt(item.date.split("-")[2], 10) === 10;
+            const hasDocs = item.documents && item.documents.length > 0;
+            return {
+                ...item,
+                isMonthly,
+                hasDocs,
+                docsTitle: hasDocs ? item.documents.map((d) => d.name).join("\n") : "No documents (click to add)"
+            };
+        });
+    }, [schedule]);
+
     return (
         <section className="card p-5 sm:p-6">
             <header className="mb-4 flex items-center justify-between gap-3">
@@ -104,16 +117,14 @@ export default function HistoryList({ schedule, onDelete, onUpdate, onUploadDocu
                 </button>
             </header>
 
-            {schedule.length === 0 ? (
+            {processedSchedule.length === 0 ? (
                 <div className="py-12 text-center text-sm text-secondary">
                     No payments yet. Add your first payment above.
                 </div>
             ) : (
                 <div className="space-y-2">
-                    {schedule.map((item) => {
-                        const isMonthly =
-                            item.date && parseInt(item.date.split("-")[2], 10) === 10;
-                        const hasDocs = item.documents && item.documents.length > 0;
+                    {processedSchedule.map((item) => {
+                        const { isMonthly, hasDocs, docsTitle } = item;
                         return (
                             <div
                                 key={item.id}
@@ -139,11 +150,7 @@ export default function HistoryList({ schedule, onDelete, onUpdate, onUploadDocu
                                             className={`rounded-lg p-1.5 transition-colors hover:bg-surface ${
                                                 hasDocs ? "text-primary" : "text-dim"
                                             }`}
-                                            title={
-                                                hasDocs
-                                                    ? item.documents.map((d) => d.name).join("\n")
-                                                    : "No documents (click to add)"
-                                            }
+                                            title={docsTitle}
                                         >
                                             <FileText size={16} />
                                         </button>

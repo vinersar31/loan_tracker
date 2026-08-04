@@ -53,7 +53,6 @@ export default function Dashboard({ stats, schedule }) {
         };
     }, [mounted, prefs.statCardOrder]);
 
-
     const handleDragEnd = (event) => {
         const { active, over } = event;
         if (over && active.id !== over.id) {
