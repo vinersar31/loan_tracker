@@ -53,7 +53,11 @@ async function main() {
 
         let currentBalance = DEFAULT_LOAN_AMOUNT;
 
-        const calculatedSchedule = sortedPayments.map(payment => {
+        const len = sortedPayments.length;
+        const dataToExport = new Array(len);
+
+        for (let i = 0; i < len; i++) {
+            const payment = sortedPayments[i];
             const principal = parseFloat(payment.principal || 0);
             const amount = parseFloat(payment.amount || 0);
             const fees = parseFloat(payment.fees || 0);
@@ -62,27 +66,16 @@ async function main() {
             currentBalance -= principal;
             if (currentBalance < 0) currentBalance = 0;
 
-            return {
-                ...payment,
-                amount,
-                principal,
-                interest,
-                fees,
-                remainingBalance: currentBalance
+            // Reverse for display (newest first) by populating from the end
+            dataToExport[len - 1 - i] = {
+                Date: payment.date, // Server side, just use the string or parse date if needed
+                Principal: principal,
+                Interest: interest,
+                Fees: fees,
+                Total: amount,
+                RemainingBalance: currentBalance
             };
-        });
-
-        // Reverse for display (newest first)
-        const reversedSchedule = calculatedSchedule.reverse();
-
-        const dataToExport = reversedSchedule.map(item => ({
-            Date: item.date, // Server side, just use the string or parse date if needed
-            Principal: item.principal,
-            Interest: item.interest,
-            Fees: item.fees,
-            Total: item.amount,
-            RemainingBalance: item.remainingBalance
-        }));
+        }
 
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
