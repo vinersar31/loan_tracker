@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 const XLSX = require('xlsx');
-const { DEFAULT_LOAN_AMOUNT } = require("../utils/constants");
+const { DEFAULT_LOAN_AMOUNT, EXPORT_FILENAME, EXPORT_SHEET_NAME } = require("../utils/constants");
 
 async function main() {
     console.log("Starting export process...");
@@ -17,7 +17,7 @@ async function main() {
         // if people are just testing, but normally this would process.exit(1)
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet([{ error: "No data loaded due to missing credentials" }]), "Error");
-        XLSX.writeFile(workbook, "Mortgage_Payments_History.xlsx");
+        XLSX.writeFile(workbook, EXPORT_FILENAME);
         return;
     }
 
@@ -37,8 +37,8 @@ async function main() {
         if (snapshot.empty) {
             console.log("No payments found.");
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet([{ message: "No payments recorded" }]), "Payment History");
-            XLSX.writeFile(workbook, "Mortgage_Payments_History.xlsx");
+            XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet([{ message: "No payments recorded" }]), EXPORT_SHEET_NAME);
+            XLSX.writeFile(workbook, EXPORT_FILENAME);
             return;
         }
 
@@ -86,8 +86,8 @@ async function main() {
 
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Payment History");
-        XLSX.writeFile(workbook, "Mortgage_Payments_History.xlsx");
+        XLSX.utils.book_append_sheet(workbook, worksheet, EXPORT_SHEET_NAME);
+        XLSX.writeFile(workbook, EXPORT_FILENAME);
 
         console.log("Export completed successfully.");
 

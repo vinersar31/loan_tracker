@@ -4,6 +4,7 @@ import * as XLSX from "xlsx";
 import { Download, FileText, History, Trash2 } from "lucide-react";
 import ManageDocumentsModal from "./ManageDocumentsModal";
 import { formatCurrency } from "@/utils/format";
+import { EXPORT_FILENAME, EXPORT_SHEET_NAME } from "@/utils/constants";
 
 // Click-to-edit cell
 const EditableCell = ({ value, type = "text", onSave }) => {
@@ -84,8 +85,8 @@ export default function HistoryList({ schedule, onDelete, onUpdate, onUploadDocu
         }));
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Payment History");
-        XLSX.writeFile(workbook, "Mortgage_Payments_History.xlsx");
+        XLSX.utils.book_append_sheet(workbook, worksheet, EXPORT_SHEET_NAME);
+        XLSX.writeFile(workbook, EXPORT_FILENAME);
     };
 
     const processedSchedule = useMemo(() => {
