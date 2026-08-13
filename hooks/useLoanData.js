@@ -35,16 +35,19 @@ export function useLoanData() {
 
             const { schedule: calculatedSchedule } = calculateAmortizationSchedule(updatedPayments, DEFAULT_LOAN_AMOUNT);
 
-            const reversedSchedule = calculatedSchedule.reverse();
-
-            const dataToExport = reversedSchedule.map(item => ({
-                Date: item.date,
-                Principal: item.principal,
-                Interest: item.interest,
-                Fees: item.fees,
-                Total: item.amount,
-                RemainingBalance: item.remainingBalance
-            }));
+            const len = calculatedSchedule.length;
+            const dataToExport = new Array(len);
+            for (let i = 0; i < len; i++) {
+                const item = calculatedSchedule[len - 1 - i];
+                dataToExport[i] = {
+                    Date: item.date,
+                    Principal: item.principal,
+                    Interest: item.interest,
+                    Fees: item.fees,
+                    Total: item.amount,
+                    RemainingBalance: item.remainingBalance
+                };
+            }
 
             const worksheet = XLSX.utils.json_to_sheet(dataToExport);
             const workbook = XLSX.utils.book_new();
