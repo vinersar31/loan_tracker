@@ -23,6 +23,7 @@ import {
     Wallet,
 } from 'lucide-react';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+
 import { formatCurrency } from '@/utils/format';
 import { SortableCard } from './SortableCard';
 import PaymentBreakdownChart from './PaymentBreakdownChart';
