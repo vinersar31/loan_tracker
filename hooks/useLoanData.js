@@ -2,7 +2,7 @@ import { escapeHtml } from "../utils/sanitize";
 import { useState, useEffect, useCallback } from 'react';
 import { db, storage, auth } from '@/utils/firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { DEFAULT_LOAN_AMOUNT, EXPORT_FILENAME, EXPORT_SHEET_NAME } from "@/utils/constants";
+import { DEFAULT_LOAN_AMOUNT, EXPORT_FILE_NAME, EXPORT_SHEET_NAME } from "@/utils/constants";
 import { calculateAmortizationSchedule } from "@/utils/calculations";
 import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 
@@ -59,7 +59,7 @@ export function useLoanData() {
                     html: htmlBody,
                     attachments: [
                         {
-                            filename: EXPORT_FILENAME,
+                            filename: EXPORT_FILE_NAME,
                             content: excelBase64,
                             encoding: 'base64'
                         }
