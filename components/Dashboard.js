@@ -23,10 +23,12 @@ import {
     Wallet,
 } from 'lucide-react';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { formatCurrency } from '@/utils/format';
 import { SortableCard } from './SortableCard';
 import PaymentBreakdownChart from './PaymentBreakdownChart';
 import AmortizationChart from './AmortizationChart';
 import { formatCurrency } from '@/utils/format';
+
 
 export default function Dashboard({ stats, schedule }) {
     const { prefs, mounted, updatePreference, isHidden } = useUserPreferences();
