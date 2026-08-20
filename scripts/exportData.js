@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 const XLSX = require('xlsx');
-const { DEFAULT_LOAN_AMOUNT } = require("../utils/constants");
+const { DEFAULT_LOAN_AMOUNT, EXPORT_FILE_NAME, EXPORT_SHEET_NAME } = require("../utils/constants");
 
 async function main() {
     console.log("Starting export process...");
@@ -16,8 +16,8 @@ async function main() {
         // We write an empty/dummy file so the CI pipeline doesn't fail on missing attachment
         // if people are just testing, but normally this would process.exit(1)
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet([{ error: "No data loaded due to missing credentials" }]), "Error");
-        XLSX.writeFile(workbook, "Mortgage_Payments_History.xlsx");
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet([{ error: "No data loaded due to missing credentials" }]), "Error"); // Kept as Error sheet for error case
+        XLSX.writeFile(workbook, EXPORT_FILE_NAME);
         return;
     }
 
@@ -37,8 +37,8 @@ async function main() {
         if (snapshot.empty) {
             console.log("No payments found.");
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet([{ message: "No payments recorded" }]), "Payment History");
-            XLSX.writeFile(workbook, "Mortgage_Payments_History.xlsx");
+            XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet([{ message: "No payments recorded" }]), EXPORT_SHEET_NAME);
+            XLSX.writeFile(workbook, EXPORT_FILE_NAME);
             return;
         }
 
@@ -53,7 +53,11 @@ async function main() {
 
         let currentBalance = DEFAULT_LOAN_AMOUNT;
 
-        const calculatedSchedule = sortedPayments.map(payment => {
+        const len = sortedPayments.length;
+        const dataToExport = new Array(len);
+
+        for (let i = 0; i < len; i++) {
+            const payment = sortedPayments[i];
             const principal = parseFloat(payment.principal || 0);
             const amount = parseFloat(payment.amount || 0);
             const fees = parseFloat(payment.fees || 0);
@@ -62,32 +66,21 @@ async function main() {
             currentBalance -= principal;
             if (currentBalance < 0) currentBalance = 0;
 
-            return {
-                ...payment,
-                amount,
-                principal,
-                interest,
-                fees,
-                remainingBalance: currentBalance
+            // Reverse for display (newest first) by populating backwards
+            dataToExport[len - 1 - i] = {
+                Date: payment.date, // Server side, just use the string or parse date if needed
+                Principal: principal,
+                Interest: interest,
+                Fees: fees,
+                Total: amount,
+                RemainingBalance: currentBalance
             };
-        });
-
-        // Reverse for display (newest first)
-        const reversedSchedule = calculatedSchedule.reverse();
-
-        const dataToExport = reversedSchedule.map(item => ({
-            Date: item.date, // Server side, just use the string or parse date if needed
-            Principal: item.principal,
-            Interest: item.interest,
-            Fees: item.fees,
-            Total: item.amount,
-            RemainingBalance: item.remainingBalance
-        }));
+        }
 
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Payment History");
-        XLSX.writeFile(workbook, "Mortgage_Payments_History.xlsx");
+        XLSX.utils.book_append_sheet(workbook, worksheet, EXPORT_SHEET_NAME);
+        XLSX.writeFile(workbook, EXPORT_FILE_NAME);
 
         console.log("Export completed successfully.");
 

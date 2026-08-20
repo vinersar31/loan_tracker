@@ -2,7 +2,7 @@ import { escapeHtml } from "../utils/sanitize";
 import { useState, useEffect, useCallback } from 'react';
 import { db, storage, auth } from '@/utils/firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { DEFAULT_LOAN_AMOUNT } from "@/utils/constants";
+import { DEFAULT_LOAN_AMOUNT, EXPORT_FILE_NAME, EXPORT_SHEET_NAME } from "@/utils/constants";
 import { calculateAmortizationSchedule } from "@/utils/calculations";
 import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 
@@ -35,20 +35,23 @@ export function useLoanData() {
 
             const { schedule: calculatedSchedule } = calculateAmortizationSchedule(updatedPayments, DEFAULT_LOAN_AMOUNT);
 
-            const reversedSchedule = calculatedSchedule.reverse();
-
-            const dataToExport = reversedSchedule.map(item => ({
-                Date: item.date,
-                Principal: item.principal,
-                Interest: item.interest,
-                Fees: item.fees,
-                Total: item.amount,
-                RemainingBalance: item.remainingBalance
-            }));
+            const len = calculatedSchedule.length;
+            const dataToExport = new Array(len);
+            for (let i = 0; i < len; i++) {
+                const item = calculatedSchedule[len - 1 - i];
+                dataToExport[i] = {
+                    Date: item.date,
+                    Principal: item.principal,
+                    Interest: item.interest,
+                    Fees: item.fees,
+                    Total: item.amount,
+                    RemainingBalance: item.remainingBalance
+                };
+            }
 
             const worksheet = XLSX.utils.json_to_sheet(dataToExport);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Payment History");
+            XLSX.utils.book_append_sheet(workbook, worksheet, EXPORT_SHEET_NAME);
             const excelBase64 = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
 
             // Add document to 'mail' collection for Firebase Trigger Email extension
@@ -59,7 +62,7 @@ export function useLoanData() {
                     html: htmlBody,
                     attachments: [
                         {
-                            filename: 'Mortgage_Payments_History.xlsx',
+                            filename: EXPORT_FILE_NAME,
                             content: excelBase64,
                             encoding: 'base64'
                         }
