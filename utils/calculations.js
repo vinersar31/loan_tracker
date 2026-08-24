@@ -1,6 +1,6 @@
 export const calculateAmortizationSchedule = (payments, defaultLoanAmount) => {
     // Sort payments by date ASCENDING for calculation
-    const sortedPayments = [...payments].sort((a, b) => a.date.localeCompare(b.date));
+    const sortedPayments = [...payments].sort((a, b) => new Date(a.date) - new Date(b.date));
 
     let currentBalance = defaultLoanAmount;
     let totalPaid = 0;

@@ -27,7 +27,7 @@ const validateFile = (file, acceptString) => {
     };
 
     const expectedMimeType = mimeTypes[fileExtension];
-    if (!expectedMimeType || file.type !== expectedMimeType) {
+    if (expectedMimeType && file.type !== expectedMimeType) {
         return false;
     }
 
