@@ -12,12 +12,27 @@ const defaultPreferences = {
 
 const UserPreferencesContext = createContext();
 
+
+function validatePreferences(parsed) {
+    if (!parsed || typeof parsed !== 'object') return defaultPreferences;
+
+    return {
+        theme: parsed.theme === 'light' || parsed.theme === 'dark' ? parsed.theme : defaultPreferences.theme,
+        hiddenIndicators: Array.isArray(parsed.hiddenIndicators) ? parsed.hiddenIndicators.filter(i => typeof i === 'string') : defaultPreferences.hiddenIndicators,
+        hiddenStatCards: Array.isArray(parsed.hiddenStatCards) ? parsed.hiddenStatCards.filter(i => typeof i === 'string') : defaultPreferences.hiddenStatCards,
+        statCardOrder: Array.isArray(parsed.statCardOrder) ? parsed.statCardOrder.filter(i => typeof i === 'string') : defaultPreferences.statCardOrder,
+        indicatorOrder: Array.isArray(parsed.indicatorOrder) ? parsed.indicatorOrder.filter(i => typeof i === 'string') : defaultPreferences.indicatorOrder
+    };
+}
+
 export function UserPreferencesProvider({ children }) {
     const [prefs, setPrefs] = useState(() => {
         if (typeof window === 'undefined') return defaultPreferences;
         try {
             const stored = localStorage.getItem(PREFS_KEY);
-            return stored ? JSON.parse(stored) : defaultPreferences;
+            if (!stored) return defaultPreferences;
+            const parsed = JSON.parse(stored);
+            return validatePreferences(parsed);
         } catch (e) {
             console.error("Failed to load preferences", e);
             return defaultPreferences;
