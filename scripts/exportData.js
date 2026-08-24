@@ -32,7 +32,7 @@ async function main() {
 
         const db = admin.firestore();
         const paymentsRef = db.collection('payments');
-        const snapshot = await paymentsRef.orderBy("date", "desc").get();
+        const snapshot = await paymentsRef.orderBy("date", "asc").get();
 
         if (snapshot.empty) {
             console.log("No payments found.");
@@ -47,17 +47,15 @@ async function main() {
             payments.push({ id: doc.id, ...doc.data() });
         });
 
-        // Calculate schedule logic similar to useLoanData.js
-        const sortedPayments = [...payments].sort((a, b) => new Date(a.date) - new Date(b.date));
 
 
         let currentBalance = DEFAULT_LOAN_AMOUNT;
 
-        const len = sortedPayments.length;
+        const len = payments.length;
         const dataToExport = new Array(len);
 
         for (let i = 0; i < len; i++) {
-            const payment = sortedPayments[i];
+            const payment = payments[i];
             const principal = parseFloat(payment.principal || 0);
             const amount = parseFloat(payment.amount || 0);
             const fees = parseFloat(payment.fees || 0);
