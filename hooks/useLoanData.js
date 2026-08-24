@@ -1,8 +1,9 @@
+import xss from "xss";
 import { escapeHtml } from "../utils/sanitize";
 import { useState, useEffect, useCallback } from 'react';
 import { db, storage, auth } from '@/utils/firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { DEFAULT_LOAN_AMOUNT, EXPORT_FILE_NAME, EXPORT_SHEET_NAME } from "../utils/constants";
+import { DEFAULT_LOAN_AMOUNT, EXPORT_FILE_NAME, EXPORT_SHEET_NAME } from "@/utils/constants";
 import { calculateAmortizationSchedule } from "@/utils/calculations";
 import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 
@@ -130,7 +131,7 @@ export function useLoanData() {
                 <p>Please find the updated payment history attached.</p>
             `;
 
-            await sendEmailNotification(updatedPayments, "New Mortgage Payment Added", htmlBody);
+            await sendEmailNotification(updatedPayments, "New Mortgage Payment Added", xss(htmlBody));
 
         } catch (e) {
             console.error("Error adding document: ", e);
@@ -168,7 +169,7 @@ export function useLoanData() {
                         <p>Please find the updated payment history attached.</p>
                     `;
 
-                    await sendEmailNotification(updatedPayments, "Mortgage Payment Removed", htmlBody);
+                    await sendEmailNotification(updatedPayments, "Mortgage Payment Removed", xss(htmlBody));
                 }
             } catch (e) {
                 console.error("Error deleting document: ", e);

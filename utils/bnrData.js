@@ -1,4 +1,3 @@
-import { doc, getDoc } from 'firebase/firestore';
 import { db as firebaseDb } from './firebase';
 /**
  * BNR (Banca Națională a României) Data Utilities
@@ -34,7 +33,7 @@ export async function fetchEURRON() {
 // Fetch other indicators from Firestore
 export async function getStoredIndicators(db = firebaseDb) {
     try {
-
+        const { doc, getDoc } = await import('firebase/firestore');
         const docRef = doc(db || firebaseDb, 'indicators', 'latest');
         const docSnap = await getDoc(docRef);
 

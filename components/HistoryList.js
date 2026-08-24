@@ -4,7 +4,7 @@ import * as XLSX from "xlsx";
 import { Download, FileText, History, Trash2 } from "lucide-react";
 import ManageDocumentsModal from "./ManageDocumentsModal";
 import { formatCurrency } from "@/utils/format";
-import { EXPORT_FILE_NAME, EXPORT_SHEET_NAME } from "../utils/constants";
+import { EXPORT_FILE_NAME, EXPORT_SHEET_NAME } from "@/utils/constants";
 
 // Click-to-edit cell
 const EditableCell = ({ value, type = "text", onSave }) => {
