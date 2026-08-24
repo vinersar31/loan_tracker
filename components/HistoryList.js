@@ -56,6 +56,7 @@ const EditableCell = ({ value, type = "text", onSave }) => {
         </button>
     );
 };
+import { EXPORT_FILE_NAME, EXPORT_SHEET_NAME } from "@/utils/constants";
 
 function Field({ label, children }) {
     return (
@@ -84,8 +85,8 @@ export default function HistoryList({ schedule, onDelete, onUpdate, onUploadDocu
         }));
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Payment History");
-        XLSX.writeFile(workbook, "Mortgage_Payments_History.xlsx");
+        XLSX.utils.book_append_sheet(workbook, worksheet, EXPORT_SHEET_NAME);
+        XLSX.writeFile(workbook, EXPORT_FILE_NAME);
     };
 
     const processedSchedule = useMemo(() => {

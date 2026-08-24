@@ -4,7 +4,7 @@ import { FileText, Upload, X } from 'lucide-react';
 
 
 const validateFile = (file, acceptString) => {
-    if (!acceptString) return true;
+    if (typeof acceptString !== 'string' || !acceptString) return true;
 
     const allowedExtensions = acceptString.split(',').map(ext => ext.trim().toLowerCase());
     const fileName = file.name || '';
@@ -27,7 +27,7 @@ const validateFile = (file, acceptString) => {
     };
 
     const expectedMimeType = mimeTypes[fileExtension];
-    if (expectedMimeType && file.type !== expectedMimeType) {
+    if (!expectedMimeType || file.type !== expectedMimeType) {
         return false;
     }
 
