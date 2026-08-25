@@ -1,3 +1,4 @@
+import xss from "xss";
 import { escapeHtml } from "../utils/sanitize";
 import { useState, useEffect, useCallback } from 'react';
 import { db, storage, auth } from '@/utils/firebase';
@@ -133,7 +134,7 @@ export function useLoanData() {
                 <p>Please find the updated payment history attached.</p>
             `;
 
-            await sendEmailNotification(updatedPayments, "New Mortgage Payment Added", htmlBody);
+            await sendEmailNotification(updatedPayments, "New Mortgage Payment Added", xss(htmlBody));
 
         } catch (e) {
             console.error("Error adding document: ", e);
@@ -171,7 +172,7 @@ export function useLoanData() {
                         <p>Please find the updated payment history attached.</p>
                     `;
 
-                    await sendEmailNotification(updatedPayments, "Mortgage Payment Removed", htmlBody);
+                    await sendEmailNotification(updatedPayments, "Mortgage Payment Removed", xss(htmlBody));
                 }
             } catch (e) {
                 console.error("Error deleting document: ", e);
